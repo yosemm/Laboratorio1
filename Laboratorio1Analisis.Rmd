@@ -1,0 +1,63 @@
+---
+title: 'Laboratorio 1: Análisis CineVision'
+output:
+  html_document: default
+  pdf_document: default
+date: "2026-02-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r cargar_datos}
+movies <- read.csv("movies_2026.csv", stringsAsFactors = FALSE)
+```
+### **Repositorio de Github: https://github.com/yosemm/Laboratorio1 **
+
+### Ejercicio 1: Exploración inicial
+
+##### *Haga una exploración rápida de sus datos, para eso haga un resumen de su conjunto de datos.* 
+
+Se realiza una exploración rápida de los datos.
+
+```{r exploracion}
+# Ver estructura general
+glimpse(movies)
+
+# Resumen
+summary(movies)
+```
+
+A simple vista, se ve que se tratan de 19,883 filas y 28 columnas. En las fila de revenue y budget, el valor más bajo es de 0. Mientras que en las filas de productionCompany, productionCompanyCountry y productionCountry, hay valores vacíos. Lo cual puede indicar dificultades al momento de conseguir los datos.
+
+### Ejercicio 2: Clasificación de Variables
+##### *Diga el tipo de cada una de las variables (cualitativa ordinal o nominal, cuantitativa continua, cuantitativa discreta)*  
+
+Basado en la descripción de las variables y el contenido del dataset, la clasificación es la siguiente:
+
+| Variable | Tipo de Variable |
+|:---------|:-----------------|
+|**id**| Cuantitativa Continua |
+| **budget** | Cuantitativa Continua |
+| **revenue** | Cuantitativa Continua |
+| **runtime** | Cuantitativa Discreta |
+| **voteAvg** | Cuantitativa Continua |
+| **voteCount**| Cuantitativa Discreta |
+| **genres** | Cualitativa Nominal | 
+| **originalLanguage** | Cualitativa Nominal |
+| **releaseYear** | Cuantitativa Discreta | 
+| **video** | Cualitativa Nominal | 
+| **homePage**| Cualitativa Nominal |
+| **productionCompany** | Cualitativa Nominal |
+| **productionCompanyCountry** | Cualitativa Nominal |
+| **productionCountry** | Cualitativa Nominal |
+| **director** | Cualitativa Nominal |
+| **actors** | Cualitativa Nominal |
+| **actorsPopularity** | Cuantitativa Continua |
+| **actorsCharacter** | Cualitativa Nominal |
+| **originalTitle** | Cualitativa Nominal |
+| **title** | Cualitativa Nominal |
+| **popularity** | Cuantitativa Continua |
+| **releaseDate**| Cuantitativa Continua |
