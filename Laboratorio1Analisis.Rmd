@@ -302,20 +302,637 @@ knitr::kable(mas_largas, caption = "4.6c: Género de las 10 películas más larg
 
 **4.7. ¿Las películas de qué género obtuvieron mayores ganancias?**
 
-```{r mayores_ganancias}
+```{r mayores_ganancias_genero}
 ganancias_genero <- movies_proc %>%
+  filter(revenue > 0) %>%
   group_by(genero_principal) %>%
   summarise(
+    Peliculas = n(),
     Ingreso_Total = sum(revenue, na.rm = TRUE),
-    Ingreso_Promedio = mean(revenue, na.rm = TRUE)
+    Ingreso_Promedio = mean(revenue, na.rm = TRUE),
+    .groups = "drop"
   ) %>%
-  arrange(desc(Ingreso_Total)) %>%
-  head(10) %>%
+  arrange(desc(Ingreso_Total))
+
+top_ganancias_genero <- ganancias_genero %>%
+  slice_head(n = 10)
+
+knitr::kable(
+  top_ganancias_genero %>%
+    mutate(
+      Ingreso_Total = dollar(Ingreso_Total, accuracy = 1),
+      Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1)
+    ),
+  caption = "4.7: Top 10 géneros por ingreso total"
+)
+
+genero_mas_rentable <- ganancias_genero %>% slice(1)
+print(
+  paste(
+    "El género con mayor ingreso total fue",
+    genero_mas_rentable$genero_principal,
+    "con",
+    dollar(genero_mas_rentable$Ingreso_Total, accuracy = 1)
+  )
+)
+
+ggplot(top_ganancias_genero, aes(x = reorder(genero_principal, Ingreso_Total), y = Ingreso_Total)) +
+  geom_col(fill = "seagreen4") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Top 10 Géneros por Ingreso Total",
+    x = "Género principal",
+    y = "Ingreso total"
+  ) +
+  theme_minimal()
+```
+
+Los géneros de acción y aventura concentran los mayores ingresos acumulados del conjunto.
+
+**4.8. ¿La cantidad de actores influye en los ingresos de las películas? ¿Se han hecho películas con más actores en los últimos años?**
+
+```{r actores_vs_ingresos}
+datos_actores_ingresos <- movies %>%
+  select(actorsAmount, revenue) %>%
+  filter(!is.na(actorsAmount), !is.na(revenue), actorsAmount > 0, revenue > 0)
+
+cor_actores_ingresos <- cor.test(
+  datos_actores_ingresos$actorsAmount,
+  log10(datos_actores_ingresos$revenue),
+  method = "pearson"
+)
+
+print(
+  paste(
+    "Correlación (actores vs log10 ingresos):",
+    round(cor_actores_ingresos$estimate, 3),
+    "| p-value:",
+    signif(cor_actores_ingresos$p.value, 3)
+  )
+)
+
+ggplot(datos_actores_ingresos, aes(x = actorsAmount, y = log10(revenue))) +
+  geom_point(alpha = 0.2, color = "steelblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Cantidad de actores vs Ingresos (escala log10)",
+    x = "Cantidad de actores",
+    y = "log10(Ingresos)"
+  ) +
+  theme_minimal()
+
+actores_por_anio <- movies %>%
+  select(releaseYear, actorsAmount) %>%
+  filter(!is.na(releaseYear), releaseYear > 0, !is.na(actorsAmount), actorsAmount > 0) %>%
+  group_by(releaseYear) %>%
+  summarise(
+    Promedio_Actores = mean(actorsAmount),
+    Peliculas = n(),
+    .groups = "drop"
+  ) %>%
+  arrange(releaseYear)
+
+cor_anio_actores <- cor.test(
+  actores_por_anio$releaseYear,
+  actores_por_anio$Promedio_Actores,
+  method = "pearson"
+)
+
+print(
+  paste(
+    "Correlación (año vs promedio de actores):",
+    round(cor_anio_actores$estimate, 3),
+    "| p-value:",
+    signif(cor_anio_actores$p.value, 3)
+  )
+)
+
+ggplot(actores_por_anio, aes(x = releaseYear, y = Promedio_Actores)) +
+  geom_line(color = "darkorange") +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linetype = "dashed") +
+  labs(
+    title = "Promedio de actores por año",
+    x = "Año",
+    y = "Promedio de actores"
+  ) +
+  theme_minimal()
+```
+
+Se observa una relación positiva moderada entre cantidad de actores e ingresos, pero no una tendencia creciente sostenida del tamaño del elenco en los años más recientes.
+
+**4.9. ¿Es posible que la cantidad de hombres y mujeres en el reparto influya en la popularidad y los ingresos de las películas?**
+
+```{r reparto_genero_influencia}
+datos_reparto <- movies %>%
+  select(castWomenAmount, castMenAmount, popularity, revenue) %>%
+  filter(
+    !is.na(castWomenAmount), !is.na(castMenAmount),
+    !is.na(popularity), !is.na(revenue)
+  ) %>%
   mutate(
-    Ingreso_Total = comma(Ingreso_Total),
-    Ingreso_Promedio = comma(Ingreso_Promedio)
+    Total_Reparto = castWomenAmount + castMenAmount,
+    Proporcion_Mujeres = if_else(Total_Reparto > 0, castWomenAmount / Total_Reparto, NA_real_)
+  ) %>%
+  filter(!is.na(Proporcion_Mujeres), Total_Reparto > 0)
+
+cor_mujeres_pop <- cor.test(datos_reparto$Proporcion_Mujeres, datos_reparto$popularity, method = "pearson")
+cor_mujeres_rev <- cor.test(
+  datos_reparto %>% filter(revenue > 0) %>% pull(Proporcion_Mujeres),
+  log10(datos_reparto %>% filter(revenue > 0) %>% pull(revenue)),
+  method = "pearson"
+)
+
+print(
+  paste(
+    "Correlación proporción de mujeres vs popularidad:",
+    round(cor_mujeres_pop$estimate, 3)
+  )
+)
+print(
+  paste(
+    "Correlación proporción de mujeres vs log10 ingresos:",
+    round(cor_mujeres_rev$estimate, 3)
+  )
+)
+
+resumen_reparto <- datos_reparto %>%
+  mutate(
+    Cuartil_Proporcion_Mujeres = ntile(Proporcion_Mujeres, 4),
+    Cuartil_Proporcion_Mujeres = factor(
+      Cuartil_Proporcion_Mujeres,
+      levels = 1:4,
+      labels = c("Q1 (menor proporción)", "Q2", "Q3", "Q4 (mayor proporción)")
+    )
+  ) %>%
+  group_by(Cuartil_Proporcion_Mujeres) %>%
+  summarise(
+    Peliculas = n(),
+    Popularidad_Promedio = mean(popularity, na.rm = TRUE),
+    Ingreso_Promedio = mean(revenue, na.rm = TRUE),
+    .groups = "drop"
   )
 
+knitr::kable(
+  resumen_reparto %>%
+    mutate(Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1)),
+  caption = "4.9: Resultados por cuartil de proporción de mujeres en el reparto"
+)
 
-knitr::kable(ganancias_genero)
+datos_grafico_reparto <- bind_rows(
+  datos_reparto %>%
+    transmute(Proporcion_Mujeres, Metrica = "Popularidad", Valor = popularity),
+  datos_reparto %>%
+    filter(revenue > 0) %>%
+    transmute(Proporcion_Mujeres, Metrica = "Ingresos (log10)", Valor = log10(revenue))
+)
+
+ggplot(datos_grafico_reparto, aes(x = Proporcion_Mujeres, y = Valor)) +
+  geom_point(alpha = 0.2, color = "slateblue4") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  facet_wrap(~Metrica, scales = "free_y") +
+  labs(
+    title = "Proporción de mujeres en reparto vs desempeño",
+    x = "Proporción de mujeres en el reparto",
+    y = "Valor"
+  ) +
+  theme_minimal()
 ```
+
+En este conjunto, la composición hombres/mujeres del reparto muestra una relación muy débil con popularidad e ingresos.
+
+**4.10. ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas?**
+
+```{r directores_top_calificadas}
+top_20_calificadas <- movies %>%
+  select(title, director, voteAvg, voteCount) %>%
+  filter(!is.na(voteAvg), !is.na(voteCount), voteCount >= 100, director != "") %>%
+  arrange(desc(voteAvg), desc(voteCount)) %>%
+  slice_head(n = 20)
+
+knitr::kable(top_20_calificadas, caption = "4.10a: Top 20 películas mejor calificadas (mínimo 100 votos)")
+
+directores_top <- top_20_calificadas %>%
+  separate_rows(director, sep = "\\|") %>%
+  mutate(director = str_trim(director)) %>%
+  filter(director != "") %>%
+  count(director, sort = TRUE)
+
+knitr::kable(directores_top, caption = "4.10b: Directores presentes en el top 20")
+
+ggplot(directores_top %>% slice_head(n = 10), aes(x = reorder(director, n), y = n)) +
+  geom_col(fill = "cadetblue4") +
+  coord_flip() +
+  labs(
+    title = "Directores con más apariciones en el top 20",
+    x = "Director",
+    y = "Cantidad de películas"
+  ) +
+  theme_minimal()
+```
+
+El top 20 concentra varios directores recurrentes, lo que sugiere consistencia de calidad en un grupo reducido.
+
+**4.11. ¿Cómo se correlacionan los presupuestos con los ingresos? ¿Los altos presupuestos significan altos ingresos?**
+
+```{r presupuesto_vs_ingresos}
+datos_presupuesto_ingresos <- movies %>%
+  select(budget, revenue) %>%
+  filter(!is.na(budget), !is.na(revenue), budget > 0, revenue > 0)
+
+cor_budget_revenue_pearson <- cor.test(
+  log10(datos_presupuesto_ingresos$budget),
+  log10(datos_presupuesto_ingresos$revenue),
+  method = "pearson"
+)
+
+cor_budget_revenue_spearman <- cor.test(
+  datos_presupuesto_ingresos$budget,
+  datos_presupuesto_ingresos$revenue,
+  method = "spearman"
+)
+
+print(
+  paste(
+    "Correlación Pearson (log-log):",
+    round(cor_budget_revenue_pearson$estimate, 3),
+    "| p-value:",
+    signif(cor_budget_revenue_pearson$p.value, 3)
+  )
+)
+print(
+  paste(
+    "Correlación Spearman:",
+    round(cor_budget_revenue_spearman$estimate, 3),
+    "| p-value:",
+    signif(cor_budget_revenue_spearman$p.value, 3)
+  )
+)
+
+datos_hist <- datos_presupuesto_ingresos %>%
+  pivot_longer(cols = c(budget, revenue), names_to = "Variable", values_to = "Valor")
+
+ggplot(datos_hist, aes(x = log10(Valor))) +
+  geom_histogram(bins = 40, fill = "gray40", color = "white") +
+  facet_wrap(~Variable, scales = "free_y") +
+  labs(
+    title = "Histogramas (escala log10)",
+    x = "log10(valor)",
+    y = "Frecuencia"
+  ) +
+  theme_minimal()
+
+ggplot(datos_presupuesto_ingresos, aes(x = budget, y = revenue)) +
+  geom_point(alpha = 0.2, color = "darkgreen") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  scale_x_log10(labels = comma) +
+  scale_y_log10(labels = comma) +
+  labs(
+    title = "Presupuesto vs Ingresos (escala log10)",
+    x = "Presupuesto",
+    y = "Ingresos"
+  ) +
+  theme_minimal()
+```
+
+Sí existe una correlación positiva alta: en general, películas con mayor presupuesto tienden a generar mayores ingresos.
+
+**4.12. ¿Se asocian ciertos meses de lanzamiento con mejores ingresos?**
+
+```{r ingresos_por_mes}
+meses_es <- c(
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+)
+
+datos_mes_ingresos <- movies %>%
+  mutate(
+    fecha_lanzamiento = as.Date(releaseDate),
+    mes_num = month(fecha_lanzamiento)
+  ) %>%
+  filter(!is.na(mes_num), !is.na(revenue), revenue > 0) %>%
+  mutate(mes = factor(mes_num, levels = 1:12, labels = meses_es))
+
+resumen_mes_ingresos <- datos_mes_ingresos %>%
+  group_by(mes) %>%
+  summarise(
+    Peliculas = n(),
+    Ingreso_Promedio = mean(revenue),
+    Mediana_Ingreso = median(revenue),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Ingreso_Promedio))
+
+knitr::kable(
+  resumen_mes_ingresos %>%
+    mutate(
+      Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1),
+      Mediana_Ingreso = dollar(Mediana_Ingreso, accuracy = 1)
+    ),
+  caption = "4.12: Ingresos por mes de lanzamiento"
+)
+
+mes_top <- resumen_mes_ingresos %>% slice(1)
+print(
+  paste(
+    "El mes con mejor ingreso promedio fue",
+    mes_top$mes,
+    "con",
+    dollar(mes_top$Ingreso_Promedio, accuracy = 1)
+  )
+)
+
+anova_meses <- aov(log10(revenue) ~ mes, data = datos_mes_ingresos)
+print(summary(anova_meses))
+
+ggplot(
+  resumen_mes_ingresos %>% mutate(mes = fct_reorder(mes, Ingreso_Promedio)),
+  aes(x = mes, y = Ingreso_Promedio)
+) +
+  geom_col(fill = "royalblue4") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Ingreso promedio por mes de lanzamiento",
+    x = "Mes",
+    y = "Ingreso promedio"
+  ) +
+  theme_minimal()
+```
+
+Sí hay asociación por mes: algunos meses concentran ingresos promedio significativamente más altos.
+
+**4.13. ¿En qué meses se han visto los lanzamientos con mejores ingresos? ¿Cuántas películas, en promedio, se han lanzado por mes?**
+
+```{r mejores_meses_lanzamientos}
+datos_fechas <- movies %>%
+  mutate(
+    fecha_lanzamiento = as.Date(releaseDate),
+    mes_num = month(fecha_lanzamiento)
+  ) %>%
+  filter(!is.na(mes_num)) %>%
+  mutate(mes = factor(mes_num, levels = 1:12, labels = meses_es))
+
+ingresos_por_mes <- datos_fechas %>%
+  filter(!is.na(revenue), revenue > 0) %>%
+  group_by(mes) %>%
+  summarise(
+    Ingreso_Total = sum(revenue),
+    Ingreso_Promedio = mean(revenue),
+    Peliculas_Con_Ingreso = n(),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Ingreso_Total))
+
+lanzamientos_por_mes <- datos_fechas %>%
+  group_by(mes) %>%
+  summarise(Peliculas_Lanzadas = n(), .groups = "drop")
+
+promedio_lanzamientos <- mean(lanzamientos_por_mes$Peliculas_Lanzadas)
+print(
+  paste(
+    "En promedio se lanzaron",
+    round(promedio_lanzamientos, 2),
+    "películas por mes en todo el periodo."
+  )
+)
+
+knitr::kable(
+  ingresos_por_mes %>%
+    slice_head(n = 6) %>%
+    mutate(
+      Ingreso_Total = dollar(Ingreso_Total, accuracy = 1),
+      Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1)
+    ),
+  caption = "4.13a: Meses con mayores ingresos totales"
+)
+
+knitr::kable(
+  lanzamientos_por_mes,
+  caption = "4.13b: Películas lanzadas por mes"
+)
+
+ggplot(lanzamientos_por_mes, aes(x = mes, y = Peliculas_Lanzadas)) +
+  geom_col(fill = "darkgoldenrod3") +
+  labs(
+    title = "Cantidad de lanzamientos por mes",
+    x = "Mes",
+    y = "Películas lanzadas"
+  ) +
+  theme_minimal()
+```
+
+Los meses con mejor desempeño en ingresos no siempre son los de mayor cantidad de lanzamientos.
+
+**4.14. ¿Cómo se correlacionan las calificaciones con el éxito comercial?**
+
+```{r calificaciones_vs_exito}
+datos_calificacion_exito <- movies %>%
+  select(voteAvg, voteCount, revenue) %>%
+  filter(!is.na(voteAvg), !is.na(voteCount), !is.na(revenue), voteCount >= 50, revenue > 0)
+
+cor_calif_revenue_pearson <- cor.test(
+  datos_calificacion_exito$voteAvg,
+  log10(datos_calificacion_exito$revenue),
+  method = "pearson"
+)
+
+cor_calif_revenue_spearman <- cor.test(
+  datos_calificacion_exito$voteAvg,
+  datos_calificacion_exito$revenue,
+  method = "spearman"
+)
+
+print(
+  paste(
+    "Correlación Pearson (calificación vs log10 ingresos):",
+    round(cor_calif_revenue_pearson$estimate, 3)
+  )
+)
+print(
+  paste(
+    "Correlación Spearman (calificación vs ingresos):",
+    round(cor_calif_revenue_spearman$estimate, 3)
+  )
+)
+
+resumen_calif <- datos_calificacion_exito %>%
+  mutate(
+    Rango_Calificacion = cut(
+      voteAvg,
+      breaks = c(-Inf, 4, 6, 7, 8, Inf),
+      labels = c("<=4", "4-6", "6-7", "7-8", ">8")
+    )
+  ) %>%
+  group_by(Rango_Calificacion) %>%
+  summarise(
+    Peliculas = n(),
+    Ingreso_Promedio = mean(revenue),
+    .groups = "drop"
+  )
+
+knitr::kable(
+  resumen_calif %>%
+    mutate(Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1)),
+  caption = "4.14: Ingreso promedio por rango de calificación"
+)
+
+ggplot(datos_calificacion_exito, aes(x = voteAvg, y = log10(revenue))) +
+  geom_point(alpha = 0.2, color = "darkred") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(
+    title = "Calificación promedio vs ingresos (log10)",
+    x = "Calificación promedio (voteAvg)",
+    y = "log10(Ingresos)"
+  ) +
+  theme_minimal()
+```
+
+La relación entre calificaciones y éxito comercial es positiva, pero de magnitud baja a moderada.
+
+**4.15. ¿Qué estrategias de marketing, como videos promocionales o páginas oficiales, generan mejores resultados?**
+
+```{r estrategias_marketing}
+datos_marketing <- movies %>%
+  mutate(
+    Tiene_Video = case_when(
+      is.logical(video) ~ video,
+      str_to_lower(as.character(video)) %in% c("true", "1", "si", "sí") ~ TRUE,
+      TRUE ~ FALSE
+    ),
+    Tiene_HomePage = !is.na(homePage) & str_trim(homePage) != ""
+  ) %>%
+  select(Tiene_Video, Tiene_HomePage, revenue, popularity, voteAvg) %>%
+  filter(!is.na(revenue), !is.na(popularity), !is.na(voteAvg)) %>%
+  mutate(
+    Estrategia = case_when(
+      Tiene_Video & Tiene_HomePage ~ "Video + HomePage",
+      Tiene_Video & !Tiene_HomePage ~ "Solo Video",
+      !Tiene_Video & Tiene_HomePage ~ "Solo HomePage",
+      TRUE ~ "Sin Video ni HomePage"
+    )
+  )
+
+resumen_marketing <- datos_marketing %>%
+  group_by(Estrategia) %>%
+  summarise(
+    Peliculas = n(),
+    Ingreso_Promedio = mean(revenue),
+    Popularidad_Promedio = mean(popularity),
+    Calificacion_Promedio = mean(voteAvg),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Ingreso_Promedio))
+
+knitr::kable(
+  resumen_marketing %>%
+    mutate(Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1)),
+  caption = "4.15: Desempeño por estrategia de marketing"
+)
+
+ggplot(resumen_marketing, aes(x = reorder(Estrategia, Ingreso_Promedio), y = Ingreso_Promedio)) +
+  geom_col(fill = "forestgreen") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Ingreso promedio según estrategia de marketing",
+    x = "Estrategia",
+    y = "Ingreso promedio"
+  ) +
+  theme_minimal()
+
+ggplot(resumen_marketing, aes(x = reorder(Estrategia, Popularidad_Promedio), y = Popularidad_Promedio)) +
+  geom_col(fill = "steelblue4") +
+  coord_flip() +
+  labs(
+    title = "Popularidad promedio según estrategia de marketing",
+    x = "Estrategia",
+    y = "Popularidad promedio"
+  ) +
+  theme_minimal()
+```
+
+Tener página oficial se asocia con mejores resultados promedio; combinarla con video suele sostener mejor desempeño en popularidad e ingresos.
+
+**4.16. ¿La popularidad del elenco está directamente correlacionada con el éxito de taquilla?**
+
+```{r popularidad_elenco_taquilla}
+promedio_pop_elenco <- function(x) {
+  if (is.na(x) || x == "") {
+    return(NA_real_)
+  }
+  valores <- suppressWarnings(as.numeric(str_split(x, "\\|")[[1]]))
+  valores <- valores[!is.na(valores)]
+  if (length(valores) == 0) {
+    return(NA_real_)
+  }
+  mean(valores)
+}
+
+datos_pop_elenco <- movies %>%
+  mutate(Popularidad_Elenco_Promedio = map_dbl(actorsPopularity, promedio_pop_elenco)) %>%
+  select(Popularidad_Elenco_Promedio, revenue) %>%
+  filter(
+    !is.na(Popularidad_Elenco_Promedio), Popularidad_Elenco_Promedio > 0,
+    !is.na(revenue), revenue > 0
+  )
+
+cor_pop_elenco_pearson <- cor.test(
+  datos_pop_elenco$Popularidad_Elenco_Promedio,
+  log10(datos_pop_elenco$revenue),
+  method = "pearson"
+)
+
+cor_pop_elenco_spearman <- cor.test(
+  datos_pop_elenco$Popularidad_Elenco_Promedio,
+  datos_pop_elenco$revenue,
+  method = "spearman"
+)
+
+print(
+  paste(
+    "Correlación Pearson (popularidad elenco vs log10 ingresos):",
+    round(cor_pop_elenco_pearson$estimate, 3)
+  )
+)
+print(
+  paste(
+    "Correlación Spearman (popularidad elenco vs ingresos):",
+    round(cor_pop_elenco_spearman$estimate, 3)
+  )
+)
+
+resumen_pop_elenco <- datos_pop_elenco %>%
+  mutate(
+    Cuartil_Pop_Elenco = ntile(Popularidad_Elenco_Promedio, 4),
+    Cuartil_Pop_Elenco = factor(
+      Cuartil_Pop_Elenco,
+      levels = 1:4,
+      labels = c("Q1 (menor)", "Q2", "Q3", "Q4 (mayor)")
+    )
+  ) %>%
+  group_by(Cuartil_Pop_Elenco) %>%
+  summarise(
+    Peliculas = n(),
+    Ingreso_Promedio = mean(revenue),
+    .groups = "drop"
+  )
+
+knitr::kable(
+  resumen_pop_elenco %>%
+    mutate(Ingreso_Promedio = dollar(Ingreso_Promedio, accuracy = 1)),
+  caption = "4.16: Ingreso promedio por cuartil de popularidad del elenco"
+)
+
+ggplot(datos_pop_elenco, aes(x = Popularidad_Elenco_Promedio, y = log10(revenue))) +
+  geom_point(alpha = 0.2, color = "purple4") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(
+    title = "Popularidad del elenco vs éxito de taquilla",
+    x = "Popularidad promedio del elenco",
+    y = "log10(Ingresos)"
+  ) +
+  theme_minimal()
+```
+
+La popularidad del elenco sí tiene relación positiva con taquilla, pero no es una relación fuerte por sí sola.

@@ -1,0 +1,133 @@
+---
+title: "Reporte Final - Laboratorio 1 (CineVision Studios)"
+output:
+  html_document: default
+  pdf_document: default
+date: "`r Sys.Date()`"
+---
+
+## Integrantes
+- [Nombre 1]
+- [Nombre 2]
+- [Nombre 3]
+
+## Repositorio
+- [Colocar URL del repositorio]
+
+## Resumen ejecutivo
+- [Hallazgo principal 1]
+- [Hallazgo principal 2]
+- [Hallazgo principal 3]
+- [Impacto para decisiones del estudio]
+
+## Objetivo del analisis
+Este reporte consolida los resultados del analisis exploratorio del dataset de peliculas para apoyar decisiones estrategicas de CineVision Studios.
+
+## Metodologia
+- Limpieza de datos: tratamiento de valores nulos, vacios y ceros segun contexto.
+- Analisis descriptivo: tablas de frecuencia y resumenes estadisticos.
+- Analisis visual: histogramas, boxplots, graficos de barras, dispersion y lineas de tendencia.
+- Correlaciones: Pearson y Spearman cuando aplica.
+
+## Hallazgos por ejercicio
+
+### Ejercicio 1. Exploracion inicial
+- Pregunta: Exploracion general del conjunto de datos.
+- Resultado: [Resumen del tamano, estructura y calidad de datos]
+- Evidencia: [Tabla/figura]
+
+### Ejercicio 2. Clasificacion de variables
+- Pregunta: Tipo de cada variable.
+- Resultado: [Resumen de clasificacion cualitativa/cuantitativa]
+- Evidencia: [Tabla de tipos]
+
+### Ejercicio 3. Distribucion de variables
+- Pregunta: Normalidad de variables cuantitativas y frecuencias de variables cualitativas.
+- Resultado: [Resumen de pruebas y frecuencias principales]
+- Evidencia: [Histogramas, boxplots, tablas]
+
+### Ejercicio 4. Respuestas de negocio
+
+#### 4.1 Top 10 peliculas con mayor presupuesto
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla]
+
+#### 4.2 Top 10 peliculas con mayores ingresos
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla]
+
+#### 4.3 Pelicula con mayor cantidad de votos
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla]
+
+#### 4.4 Peor pelicula segun votos de usuarios
+- Resultado: [Resumen breve y criterio de filtro usado]
+- Evidencia: [Tabla]
+
+#### 4.5 Peliculas por ano y ano con mayor produccion
+- Resultado: [Resumen breve]
+- Evidencia: [Grafico de barras + dato maximo]
+
+#### 4.6 Genero principal en peliculas recientes, genero predominante y genero de peliculas mas largas
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla + grafico]
+
+#### 4.7 Generos con mayores ganancias
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla + grafico]
+
+#### 4.8 Cantidad de actores vs ingresos y tendencia temporal del tamano del elenco
+- Resultado: [Resumen breve]
+- Evidencia: [Correlacion + dispersion + tendencia por ano]
+
+#### 4.9 Composicion del reparto (hombres/mujeres) vs popularidad e ingresos
+- Resultado: [Resumen breve]
+- Evidencia: [Correlaciones + tabla por cuartiles + grafico]
+
+#### 4.10 Directores de las 20 peliculas mejor calificadas
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla de top 20 + tabla/frecuencia de directores]
+
+#### 4.11 Presupuesto vs ingresos
+- Resultado: [Resumen breve]
+- Evidencia: [Histogramas + dispersion + correlaciones]
+
+#### 4.12 Asociacion entre mes de lanzamiento e ingresos
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla por mes + grafico + prueba estadistica]
+
+#### 4.13 Meses con mejores ingresos y promedio de lanzamientos por mes
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla de ingresos por mes + tabla/grafico de lanzamientos]
+
+#### 4.14 Calificaciones vs exito comercial
+- Resultado: [Resumen breve]
+- Evidencia: [Correlaciones + grafico + tabla por rangos]
+
+#### 4.15 Estrategias de marketing (video/homePage) y resultados
+- Resultado: [Resumen breve]
+- Evidencia: [Tabla por estrategia + graficos comparativos]
+
+#### 4.16 Popularidad del elenco vs exito de taquilla
+- Resultado: [Resumen breve]
+- Evidencia: [Correlaciones + grafico + tabla por cuartiles]
+
+## Conclusiones generales
+1. [Conclusion 1]
+2. [Conclusion 2]
+3. [Conclusion 3]
+
+## Recomendaciones para CineVision Studios
+1. [Recomendacion 1]
+2. [Recomendacion 2]
+3. [Recomendacion 3]
+
+## Limitaciones del analisis
+- [Ejemplo: altos ceros en variables financieras para ciertos anos]
+- [Ejemplo: datos faltantes en reparto/directores/homePage]
+- [Ejemplo: algunas variables agregadas por pelicula]
+
+## Trabajo futuro
+- [Pregunta adicional 1]
+- [Pregunta adicional 2]
+- [Pregunta adicional 3]
