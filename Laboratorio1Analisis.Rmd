@@ -10,6 +10,8 @@ date: "2026-02-02"
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(nortest)
+library(scales)
+library(lubridate)
 ```
 
 ```{r cargar_datos}
@@ -147,13 +149,14 @@ movies %>%
   mutate(Porcentaje = round(n / sum(movies %>% count(originalLanguage) %>% pull(n)) * 100, 2)) %>%
   knitr::kable(caption = "Top 10 Idiomas Originales más frecuentes")
 
-# 2. Tabla de Frecuencias: Géneros (Top 10 Combinaciones)
+# 2. Tabla de Frecuencias: Géneros
 movies %>%
+  # Separamos los géneros por la barra vertical "|"
+  separate_rows(genres, sep = "\\|") %>%
   filter(genres != "") %>%
   count(genres, sort = TRUE) %>%
-  head(10) %>%
-  mutate(Porcentaje = round(n / sum(movies %>% count(genres) %>% pull(n)) * 100, 2)) %>%
-  knitr::kable(caption = "Top 10 Géneros (Combinaciones)")
+  mutate(Porcentaje = round(n / sum(n) * 100, 2)) %>%
+  knitr::kable(caption="Frecuencia de Géneros (considerando cada género por separado)")
 
 # 3. Tabla de Frecuencias: País de Producción (Top 10)
 movies %>%
@@ -179,3 +182,139 @@ movies %>%
   count(video) %>%
   mutate(Porcentaje = round(n / sum(n) * 100, 2)) %>%
   knitr::kable(caption = "Distribución de variable Video")
+```
+
+### Ejercicio 4
+##### *Responda las siguientes preguntas:*
+
+**4.1 ¿Cuáles son las 10 películas que contaron con más presupuesto?**
+```{r top_presupuesto}
+options(scipen = 999)
+top_budget <- movies %>%
+  select(title, budget) %>%
+  arrange(desc(budget)) %>%
+  head(10)%>%
+  mutate(budget = comma(budget))
+
+knitr::kable(top_budget)
+```
+
+**4.2 ¿Cuáles son las 10 películas que más ingresos tuvieron?**
+```{r top_ingresos}
+top_revenue <- movies %>%
+  select(title, revenue) %>%
+  arrange(desc(revenue)) %>%
+  head(10)
+
+knitr::kable(top_revenue)
+```
+
+**4.3 ¿Cuál es la película que más votos tuvo?**
+```{r top_votos}
+top_votos <- movies %>%
+  select(title, voteCount) %>%
+  arrange(desc(voteCount)) %>%
+  head(1)
+knitr::kable(top_votos)
+```
+
+**4.4  ¿Cuál es la peor película de acuerdo a los votos de todos los usuarios?**
+```{r peor_pelicula}
+peor_pelicula <- movies %>%
+  select(title, voteAvg, voteCount) %>%
+  filter(voteCount > 100) %>%
+  arrange(voteAvg) %>%
+  head(1)
+knitr::kable(peor_pelicula)
+```
+Agregamos un filtro para tomar las peliculas que sí recibieron varios votos.
+
+**4.5 ¿Cuántas películas se hicieron en cada año? ¿En qué año se hicieron más películas? Haga un gráfico de barras**
+
+```{r pelis_año}
+
+peliculas_por_anio <- movies %>%
+  filter(!is.na(releaseYear) & releaseYear > 0) %>%
+  count(releaseYear) %>%
+  rename(Anio = releaseYear, Cantidad = n)
+
+anio_max <- peliculas_por_anio %>%
+  arrange(desc(Cantidad)) %>%
+  slice(1)
+
+print(paste("El año en que se hicieron más películas fue:", anio_max$Anio, "con", anio_max$Cantidad, "películas."))
+
+# Gráfico de Barras
+ggplot(peliculas_por_anio, aes(x = Anio, y = Cantidad)) +
+  geom_col(fill = "steelblue") +
+  theme_minimal() +
+  labs(
+    title = "Cantidad de Películas producidas por Año",
+    subtitle = paste("El pico máximo fue en", anio_max$Anio),
+    x = "Año de Lanzamiento",
+    y = "Cantidad de Películas"
+  ) +
+  scale_x_continuous(breaks = seq(min(peliculas_por_anio$Anio), max(peliculas_por_anio$Anio), by = 10))
+
+```
+
+**4.6 ¿Cuál es el género principal de las 20 películas más recientes? ¿Cuál es el género principal que predomina en el conjunto de datos? Represéntelo usando un gráfico. ¿A qué género principal pertenecen las películas más largas?**
+
+```{r analisis de generos, message=FALSE, warning=FALSE}
+
+# Pre-procesamiento: 
+movies_proc <- movies %>%
+  mutate(
+    genero_principal = str_extract(genres, "^[^|]+"),
+    fecha_lanzamiento = as.Date(releaseDate)
+  ) %>%
+  filter(!is.na(genero_principal) & genero_principal != "")
+
+top_recientes <- movies_proc %>%
+  arrange(desc(fecha_lanzamiento)) %>%
+  head(20) %>%
+  count(genero_principal, sort = TRUE)
+
+knitr::kable(top_recientes, caption = "4.6a: Géneros de las 20 películas más recientes")
+
+# Género predominante
+conteo_generos <- movies_proc %>%
+  count(genero_principal, sort = TRUE) 
+genero_top <- conteo_generos$genero_principal[1]
+print(paste("El género que predomina en todo el dataset es:", genero_top))
+
+# Gráfico Top 10 Géneros
+ggplot(head(conteo_generos, 10), aes(x = reorder(genero_principal, n), y = n)) +
+  geom_col(fill = "darkcyan") +
+  coord_flip() +
+  labs(title = "Top 10 Géneros Principales", x = "Género", y = "Cantidad") +
+  theme_minimal()
+
+# Género de las películas más largas
+mas_largas <- movies_proc %>%
+  arrange(desc(runtime)) %>%
+  head(10) %>%
+  select(title, runtime, genero_principal)
+
+knitr::kable(mas_largas, caption = "4.6c: Género de las 10 películas más largas")
+```
+
+**4.7. ¿Las películas de qué género obtuvieron mayores ganancias?**
+
+```{r mayores_ganancias}
+ganancias_genero <- movies_proc %>%
+  group_by(genero_principal) %>%
+  summarise(
+    Ingreso_Total = sum(revenue, na.rm = TRUE),
+    Ingreso_Promedio = mean(revenue, na.rm = TRUE)
+  ) %>%
+  arrange(desc(Ingreso_Total)) %>%
+  head(10) %>%
+  mutate(
+    Ingreso_Total = comma(Ingreso_Total),
+    Ingreso_Promedio = comma(Ingreso_Promedio)
+  )
+
+
+knitr::kable(ganancias_genero)
+```
