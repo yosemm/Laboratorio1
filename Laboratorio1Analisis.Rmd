@@ -9,6 +9,7 @@ date: "2026-02-02"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(nortest)
 ```
 
 ```{r cargar_datos}
@@ -60,4 +61,121 @@ Basado en la descripción de las variables y el contenido del dataset, la clasif
 | **originalTitle** | Cualitativa Nominal |
 | **title** | Cualitativa Nominal |
 | **popularity** | Cuantitativa Continua |
-| **releaseDate**| Cuantitativa Continua |
+| **releaseDate**| Cualitativa Nominal |
+| **genresAmount** | Cuantitativa Discreta |
+| **productionCoAmount** | Cuantitativa Discreta |
+| **productionCountriesAmount** | Cuantitativa Discreta |
+| **actorsAmount** | Cuantitativa Discreta |
+| **castWomenAmount** | Cuantitativa Discreta |
+| **castMenAmount** | Cuantitativa Discreta |
+
+### Ejercicio 3: Distribución de Variables
+##### *Investigue si las variables cuantitativas siguen una distribución normal y haga una tabla de frecuencias de las variables cualitativas.* 
+
+```{r analisis_normalidad, fig.height=10, fig.width=8}
+# Guardar las variables cuantitativas relevantes
+vars_cuantitativas <- movies %>%
+  select(budget, revenue, runtime, voteAvg, voteCount, genresAmount, productionCoAmount, productionCountriesAmount, actorsAmount, castWomenAmount, castMenAmount, popularity, voteCount) %>%
+  drop_na() # Eliminamos NAs
+
+# 1. Visualización: Histogramas
+vars_cuantitativas %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Valor") %>%
+  ggplot(aes(x = Valor)) +
+  geom_histogram(bins = 30, fill = "cornflowerblue", color = "black") +
+  facet_wrap(~Variable, scales = "free", ncol = 2) +
+  theme_minimal() +
+  labs(title = "Histogramas de Variables Cuantitativas", y = "Frecuencia")
+
+# 2. Visualización: Boxplots (Diagramas de Caja)
+vars_cuantitativas %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Valor") %>%
+  ggplot(aes(x = Variable, y = Valor)) +
+  geom_boxplot(fill = "orange", alpha = 0.7) +
+  facet_wrap(~Variable, scales = "free", ncol = 2) +
+  theme_minimal() +
+  labs(title = "Boxplots de Variables Cuantitativas", y = "Valor")
+
+```
+
+```{r pruebas_estadisticas, warning=FALSE}
+# Función para aplicar tests
+analizar_normalidad <- function(columna, nombre) {
+  # Prueba de Kolmogorov-Smirnov
+  ks <- ks.test(columna, "pnorm", mean(columna), sd(columna))
+  
+  # Prueba de Lilliefors
+  lillie <- lillie.test(columna)
+  
+  return(data.frame(
+    Variable = nombre,
+    KS_p_value = ks$p.value,
+    Lillie_p_value = lillie$p.value,
+    Es_Normal = ifelse(lillie$p.value > 0.05, "Sí", "No")
+  ))
+}
+
+# Aplicamos la función
+resultados <- bind_rows(
+  analizar_normalidad(movies$budget, "Budget"),
+  analizar_normalidad(movies$revenue, "Revenue"),
+  analizar_normalidad(movies$voteAvg, "VoteAvg"),
+  analizar_normalidad(movies$popularity, "Popularity"),
+  analizar_normalidad(movies$runtime[movies$runtime > 0], "Runtime"),
+  analizar_normalidad(movies$voteCount, "VoteCount"),
+  analizar_normalidad(movies$genresAmount, "GenresAmount"),
+  analizar_normalidad(movies$productionCoAmount, "ProductionCoAmount"),
+  analizar_normalidad(movies$productionCountriesAmount, "ProductionCountriesAmount"),
+  analizar_normalidad(movies$actorsAmount, "ActorsAmount"),
+  analizar_normalidad(movies$castWomenAmount[!is.na(movies$castWomenAmount)], "CastWomenAmount"),
+  analizar_normalidad(movies$castMenAmount[!is.na(movies$castMenAmount)], "CastMenAmount")
+)
+
+print(resultados)
+```
+Removimos los valores nulos y ceros en las variables donde es necesario para evitar errores en las pruebas estadísticas.
+
+#### 3.3 Tablas de Frecuencia (Variables Cualitativas)
+
+A continuación se muestran las frecuencias de variables categóricas.
+
+```{r tablas_frecuencia}
+# 1. Tabla de Frecuencias: Idioma Original (Top 10)
+movies %>%
+  count(originalLanguage, sort = TRUE) %>%
+  head(10) %>% 
+  mutate(Porcentaje = round(n / sum(movies %>% count(originalLanguage) %>% pull(n)) * 100, 2)) %>%
+  knitr::kable(caption = "Top 10 Idiomas Originales más frecuentes")
+
+# 2. Tabla de Frecuencias: Géneros (Top 10 Combinaciones)
+movies %>%
+  filter(genres != "") %>%
+  count(genres, sort = TRUE) %>%
+  head(10) %>%
+  mutate(Porcentaje = round(n / sum(movies %>% count(genres) %>% pull(n)) * 100, 2)) %>%
+  knitr::kable(caption = "Top 10 Géneros (Combinaciones)")
+
+# 3. Tabla de Frecuencias: País de Producción (Top 10)
+movies %>%
+  # Eliminar los que están vacíos
+  filter(productionCountry != "") %>%
+  # Corregir "US" para que se combine con United States of America
+  mutate(productionCountry = ifelse(productionCountry == "US", "United States of America", productionCountry)) %>% 
+  count(productionCountry, sort = TRUE) %>%
+  head(10) %>%
+  mutate(Porcentaje = round(n / sum(n) * 100, 2)) %>%
+  knitr::kable(caption = "Top 10 Países de Producción")
+
+# 4. Tabla de Frecuencias: Compañía Productora (Top 10)
+movies %>%
+  filter(productionCompany != "") %>%
+  count(productionCompany, sort = TRUE) %>%
+  head(10) %>%
+  mutate(Porcentaje = round(n / sum(movies %>% count(productionCompany) %>% pull(n)) * 100, 2)) %>%
+  knitr::kable(caption = "Top 10 Compañías Productoras")
+
+# 5. Tabla de Frecuencia simple: Video
+movies %>%
+  count(video) %>%
+  mutate(Porcentaje = round(n / sum(n) * 100, 2)) %>%
+  knitr::kable(caption = "Distribución de variable Video")
