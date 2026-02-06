@@ -9,13 +9,14 @@ date: "2026-02-02"
 ---
 
 #### Integrantes:
-- 22213 Jorge Chupina
-- 241452 Yehosua Hércules
-- 231270 Gadiel Ocaña
+
+-   22213 Jorge Chupina
+-   241452 Yehosua Hércules
+-   231270 Gadiel Ocaña
 
 #### Repositorio de Github:
-https://github.com/yosemm/Laboratorio1
 
+<https://github.com/yosemm/Laboratorio1>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -24,8 +25,6 @@ library(nortest)
 library(scales)
 library(lubridate)
 ```
-
-
 
 ### Ejercicio 1: Exploración inicial
 
@@ -48,44 +47,48 @@ summary(movies)
 A simple vista, se ve que se tratan de **19,883 filas** y **28 columnas**. En las fila de revenue y budget, el valor más bajo es de 0. Mientras que en las filas de *productionCompany*, *productionCompanyCountry* y *productionCountry*, hay valores vacíos. Lo cual puede indicar dificultades al momento de conseguir los datos.
 
 ### Ejercicio 2: Clasificación de Variables
+
 ##### **Diga el tipo de cada una de las variables (cualitativa ordinal o nominal, cuantitativa continua, cuantitativa discreta)**
 
 Basado en la descripción de las variables y el contenido del dataset, la clasificación es la siguiente:
 
-| Variable | Tipo de Variable |
-|:---------|:-----------------|
-|**id**| Cuantitativa Continua |
-| **budget** | Cuantitativa Continua |
-| **revenue** | Cuantitativa Continua |
-| **runtime** | Cuantitativa Discreta |
-| **voteAvg** | Cuantitativa Continua |
-| **voteCount**| Cuantitativa Discreta |
-| **genres** | Cualitativa Nominal | 
-| **originalLanguage** | Cualitativa Nominal |
-| **releaseYear** | Cuantitativa Discreta | 
-| **video** | Cualitativa Nominal | 
-| **homePage**| Cualitativa Nominal |
-| **productionCompany** | Cualitativa Nominal |
-| **productionCompanyCountry** | Cualitativa Nominal |
-| **productionCountry** | Cualitativa Nominal |
-| **director** | Cualitativa Nominal |
-| **actors** | Cualitativa Nominal |
-| **actorsPopularity** | Cuantitativa Continua |
-| **actorsCharacter** | Cualitativa Nominal |
-| **originalTitle** | Cualitativa Nominal |
-| **title** | Cualitativa Nominal |
-| **popularity** | Cuantitativa Continua |
-| **releaseDate**| Cualitativa Nominal |
-| **genresAmount** | Cuantitativa Discreta |
-| **productionCoAmount** | Cuantitativa Discreta |
+| Variable                      | Tipo de Variable      |
+|:------------------------------|:----------------------|
+| **id**                        | Cuantitativa Continua |
+| **budget**                    | Cuantitativa Continua |
+| **revenue**                   | Cuantitativa Continua |
+| **runtime**                   | Cuantitativa Discreta |
+| **voteAvg**                   | Cuantitativa Continua |
+| **voteCount**                 | Cuantitativa Discreta |
+| **genres**                    | Cualitativa Nominal   |
+| **originalLanguage**          | Cualitativa Nominal   |
+| **releaseYear**               | Cuantitativa Discreta |
+| **video**                     | Cualitativa Nominal   |
+| **homePage**                  | Cualitativa Nominal   |
+| **productionCompany**         | Cualitativa Nominal   |
+| **productionCompanyCountry**  | Cualitativa Nominal   |
+| **productionCountry**         | Cualitativa Nominal   |
+| **director**                  | Cualitativa Nominal   |
+| **actors**                    | Cualitativa Nominal   |
+| **actorsPopularity**          | Cuantitativa Continua |
+| **actorsCharacter**           | Cualitativa Nominal   |
+| **originalTitle**             | Cualitativa Nominal   |
+| **title**                     | Cualitativa Nominal   |
+| **popularity**                | Cuantitativa Continua |
+| **releaseDate**               | Cualitativa Nominal   |
+| **genresAmount**              | Cuantitativa Discreta |
+| **productionCoAmount**        | Cuantitativa Discreta |
 | **productionCountriesAmount** | Cuantitativa Discreta |
-| **actorsAmount** | Cuantitativa Discreta |
-| **castWomenAmount** | Cuantitativa Discreta |
-| **castMenAmount** | Cuantitativa Discreta |
+| **actorsAmount**              | Cuantitativa Discreta |
+| **castWomenAmount**           | Cuantitativa Discreta |
+| **castMenAmount**             | Cuantitativa Discreta |
 
-**Nota:** En el dataset, los valores en *actorsPopularity* son de tipo carácter, pero representan una medida cuantitativa de popularidad. 
+**Nota:** En el dataset, los valores en *actorsPopularity* son de tipo carácter, pero representan una medida cuantitativa de popularidad.
+
+La clasificación de las variables permite seleccionar adecuadamente las técnicas estadísticas y visualizaciones utilizadas en el análisis. No se identificaron variables cualitativas ordinales, ya que las variables categóricas presentes no poseen un orden natural. Las variables temporales, como la fecha y el año de lanzamiento, se consideran cuantitativas discretas debido a su naturaleza numérica y uso analítico.
 
 ### Ejercicio 3: Distribución de Variables
+
 ##### **Investigue si las variables cuantitativas siguen una distribución normal y haga una tabla de frecuencias de las variables cualitativas.**
 
 ```{r analisis_normalidad, fig.height=10, fig.width=8}
@@ -149,7 +152,10 @@ resultados <- bind_rows(
 
 print(resultados)
 ```
-Removimos los valores nulos y ceros en las variables donde es necesario para evitar errores en las pruebas estadísticas.
+
+Los resultados de las pruebas de Kolmogorov-Smirnov y Lilliefors indican que ninguna de las variables cuantitativas analizadas sigue una distribución normal. Este resultado es consistente con los histogramas y boxplots presentados, donde se observan distribuciones asimétricas y presencia de valores extremos.
+
+En particular, las variables financieras como presupuesto e ingresos presentan colas largas hacia la derecha, lo cual es característico de la industria cinematográfica, donde un número reducido de películas concentra una proporción significativa de los ingresos totales.
 
 #### 3.3 Tablas de Frecuencia (Variables Cualitativas)
 
@@ -197,11 +203,16 @@ movies %>%
   mutate(Porcentaje = round(n / sum(n) * 100, 2)) %>%
   knitr::kable(caption = "Distribución de variable Video")
 ```
+Las tablas de frecuencia muestran patrones claros en las variables cualitativas analizadas. El idioma inglés predomina ampliamente como idioma original, lo cual refleja su fuerte presencia en el mercado cinematográfico global.
+
+En cuanto a los géneros, se observa que algunos géneros aparecen con mucha mayor frecuencia que otros, lo que sugiere una preferencia histórica por ciertos tipos de narrativas. Finalmente, la variable video indica que solo una parte de las películas cuenta con material promocional, evidenciando diferencias significativas en las estrategias de marketing empleadas.
 
 ### Ejercicio 4
+
 ##### **Responda las siguientes preguntas:**
 
 **4.1 ¿Cuáles son las 10 películas que contaron con más presupuesto?**
+
 ```{r top_presupuesto}
 options(scipen = 999)
 top_budget <- movies %>%
@@ -212,8 +223,10 @@ top_budget <- movies %>%
 
 knitr::kable(top_budget)
 ```
+Las películas con mayor presupuesto corresponden principalmente a producciones de gran escala, asociadas a grandes estudios y franquicias. Esto evidencia una alta concentración de recursos financieros en un número reducido de proyectos dentro de la industria cinematográfica.
 
 **4.2 ¿Cuáles son las 10 películas que más ingresos tuvieron?**
+
 ```{r top_ingresos}
 top_revenue <- movies %>%
   select(title, revenue) %>%
@@ -223,8 +236,10 @@ top_revenue <- movies %>%
 
 knitr::kable(top_revenue)
 ```
+Las películas con mayores ingresos tienden a coincidir con producciones de alto presupuesto, aunque no de forma estricta. Esto sugiere que una inversión elevada aumenta las probabilidades de éxito comercial, pero no garantiza altos ingresos por sí sola.
 
 **4.3 ¿Cuál es la película que más votos tuvo?**
+
 ```{r top_votos}
 top_votos <- movies %>%
   select(title, voteCount) %>%
@@ -232,8 +247,10 @@ top_votos <- movies %>%
   head(1)
 knitr::kable(top_votos)
 ```
+La película con mayor número de votos refleja una alta participación de los usuarios, lo cual suele estar asociado a una amplia distribución y una elevada visibilidad entre el público.
 
-**4.4  ¿Cuál es la peor película de acuerdo a los votos de todos los usuarios?**
+**4.4 ¿Cuál es la peor película de acuerdo a los votos de todos los usuarios?**
+
 ```{r peor_pelicula}
 peor_pelicula <- movies %>%
   select(title, voteAvg, voteCount) %>%
@@ -242,6 +259,8 @@ peor_pelicula <- movies %>%
   head(1)
 knitr::kable(peor_pelicula)
 ```
+El uso de un filtro mínimo de votos permite reducir el sesgo que generan películas con muy pocas evaluaciones. De esta forma, la calificación obtenida representa una opinión más confiable del público general y no casos aislados.
+
 Agregamos un filtro para tomar las peliculas que sí recibieron varios votos.
 
 **4.5 ¿Cuántas películas se hicieron en cada año? ¿En qué año se hicieron más películas? Haga un gráfico de barras**
@@ -272,6 +291,7 @@ ggplot(peliculas_por_anio, aes(x = Anio, y = Cantidad)) +
   scale_x_continuous(breaks = seq(min(peliculas_por_anio$Anio), max(peliculas_por_anio$Anio), by = 10))
 
 ```
+El gráfico de barras evidencia una tendencia general al aumento en la cantidad de películas producidas por año. El año identificado como el de mayor producción refleja un pico en la actividad cinematográfica, lo cual puede asociarse al crecimiento de la industria y a la expansión de plataformas de distribución.
 
 **4.6 ¿Cuál es el género principal de las 20 películas más recientes? ¿Cuál es el género principal que predomina en el conjunto de datos? Represéntelo usando un gráfico. ¿A qué género principal pertenecen las películas más largas?**
 
@@ -313,6 +333,9 @@ mas_largas <- movies_proc %>%
 
 knitr::kable(mas_largas, caption = "4.6c: Género de las 10 películas más largas")
 ```
+Para este análisis se definió el género principal como el primer género listado para cada película. Al analizar las 20 películas más recientes se observa una concentración en ciertos géneros, lo que sugiere tendencias actuales en la producción cinematográfica.
+
+Al considerar el conjunto completo de datos, se identifica un género predominante que concentra la mayor cantidad de películas. Asimismo, las películas de mayor duración tienden a pertenecer a géneros asociados a narrativas más extensas o complejas.
 
 **4.7. ¿Las películas de qué género obtuvieron mayores ganancias?**
 
@@ -363,6 +386,7 @@ ggplot(top_ganancias_genero, aes(x = reorder(genero_principal, Ingreso_Total), y
 ```
 
 Los géneros de acción y aventura concentran los mayores ingresos acumulados del conjunto.
+Este comportamiento puede explicarse por el alto presupuesto, la amplia distribución internacional y el atractivo comercial de estos géneros, que suelen estar orientados a audiencias masivas.
 
 **4.8. ¿La cantidad de actores influye en los ingresos de las películas? ¿Se han hecho películas con más actores en los últimos años?**
 
@@ -434,6 +458,7 @@ ggplot(actores_por_anio, aes(x = releaseYear, y = Promedio_Actores)) +
 ```
 
 Se observa una relación positiva moderada entre cantidad de actores e ingresos, pero no una tendencia creciente sostenida del tamaño del elenco en los años más recientes.
+En conjunto, los resultados indican que, aunque el tamaño del elenco puede influir en los ingresos, no existe una tendencia clara que indique un crecimiento sostenido del número de actores en las producciones más recientes.
 
 **4.9. ¿Es posible que la cantidad de hombres y mujeres en el reparto influya en la popularidad y los ingresos de las películas?**
 
@@ -514,6 +539,7 @@ ggplot(datos_grafico_reparto, aes(x = Proporcion_Mujeres, y = Valor)) +
 ```
 
 En este conjunto, la composición hombres/mujeres del reparto muestra una relación muy débil con popularidad e ingresos.
+Esto sugiere que la composición de género del elenco, por sí sola, no es un factor determinante en el desempeño comercial ni en la popularidad de las películas.
 
 **4.10. ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas?**
 
@@ -550,6 +576,7 @@ ggplot(directores_top %>% slice_head(n = 10), aes(x = reorder(director, n), y = 
 ```
 
 El top 20 concentra varios directores recurrentes, lo que sugiere consistencia de calidad en un grupo reducido.
+La recurrencia de ciertos directores en el listado de películas mejor calificadas sugiere consistencia en la calidad percibida por el público, independientemente del volumen de producción.
 
 **4.11. ¿Cómo se correlacionan los presupuestos con los ingresos? ¿Los altos presupuestos significan altos ingresos?**
 
@@ -614,6 +641,7 @@ ggplot(datos_presupuesto_ingresos, aes(x = budget, y = revenue)) +
 ```
 
 Sí existe una correlación positiva alta: en general, películas con mayor presupuesto tienden a generar mayores ingresos.
+No obstante, la dispersión observada en los gráficos indica que existen excepciones importantes, lo que confirma que un alto presupuesto no garantiza automáticamente el éxito comercial.
 
 **4.12. ¿Se asocian ciertos meses de lanzamiento con mejores ingresos?**
 
@@ -679,6 +707,7 @@ ggplot(
 ```
 
 Sí hay asociación por mes: algunos meses concentran ingresos promedio significativamente más altos.
+Este patrón sugiere un efecto de estacionalidad en los lanzamientos cinematográficos, posiblemente relacionado con periodos vacacionales y festividades.
 
 **4.13. ¿En qué meses se han visto los lanzamientos con mejores ingresos? ¿Cuántas películas, en promedio, se han lanzado por mes?**
 
@@ -741,6 +770,7 @@ ggplot(lanzamientos_por_mes, aes(x = mes, y = Peliculas_Lanzadas)) +
 ```
 
 Los meses con mejor desempeño en ingresos no siempre son los de mayor cantidad de lanzamientos.
+Esto indica que una mayor cantidad de estrenos no implica necesariamente un mayor ingreso total, lo que resalta la importancia del momento de lanzamiento y del contexto del mercado.
 
 **4.14. ¿Cómo se correlacionan las calificaciones con el éxito comercial?**
 
@@ -807,6 +837,7 @@ ggplot(datos_calificacion_exito, aes(x = voteAvg, y = log10(revenue))) +
 ```
 
 La relación entre calificaciones y éxito comercial es positiva, pero de magnitud baja a moderada.
+En consecuencia, la recepción positiva del público contribuye al desempeño financiero, pero no es suficiente por sí sola para garantizar altos ingresos.
 
 **4.15. ¿Qué estrategias de marketing, como videos promocionales o páginas oficiales, generan mejores resultados?**
 
@@ -871,6 +902,7 @@ ggplot(resumen_marketing, aes(x = reorder(Estrategia, Popularidad_Promedio), y =
 ```
 
 Tener página oficial se asocia con mejores resultados promedio; combinarla con video suele sostener mejor desempeño en popularidad e ingresos.
+La combinación de múltiples estrategias de marketing parece reforzar el desempeño tanto en popularidad como en ingresos, en comparación con la ausencia de estas herramientas.
 
 **4.16. ¿La popularidad del elenco está directamente correlacionada con el éxito de taquilla?**
 
@@ -954,3 +986,4 @@ ggplot(datos_pop_elenco, aes(x = Popularidad_Elenco_Promedio, y = log10(revenue)
 ```
 
 La popularidad del elenco sí tiene relación positiva con taquilla, pero no es una relación fuerte por sí sola.
+Esto sugiere que la popularidad del elenco actúa como un factor complementario al éxito comercial, pero no como un determinante principal.
