@@ -508,7 +508,11 @@ top_20_calificadas <- movies %>%
   select(title, director, voteAvg, voteCount) %>%
   filter(!is.na(voteAvg), !is.na(voteCount), voteCount >= 100, director != "") %>%
   arrange(desc(voteAvg), desc(voteCount)) %>%
-  slice_head(n = 20)
+  slice_head(n = 20) %>%
+mutate(
+    title = iconv(title, to = "UTF-8"), 
+    director = iconv(director, to = "UTF-8")
+  )
 
 knitr::kable(top_20_calificadas, caption = "4.10a: Top 20 películas mejor calificadas (mínimo 100 votos)")
 
