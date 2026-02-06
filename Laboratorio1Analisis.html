@@ -1111,56 +1111,57 @@ tuvieron?</strong></p>
 <pre class="r"><code>top_revenue &lt;- movies %&gt;%
   select(title, revenue) %&gt;%
   arrange(desc(revenue)) %&gt;%
-  head(10)
+  head(10) %&gt;%
+  mutate(revenue = comma(revenue))
 
 knitr::kable(top_revenue)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th align="left">title</th>
-<th align="right">revenue</th>
+<th align="left">revenue</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">Avatar</td>
-<td align="right">2847246203</td>
+<td align="left">2,847,246,203</td>
 </tr>
 <tr class="even">
 <td align="left">Avengers: Endgame</td>
-<td align="right">2797800564</td>
+<td align="left">2,797,800,564</td>
 </tr>
 <tr class="odd">
 <td align="left">Titanic</td>
-<td align="right">2187463944</td>
+<td align="left">2,187,463,944</td>
 </tr>
 <tr class="even">
 <td align="left">Star Wars: The Force Awakens</td>
-<td align="right">2068223624</td>
+<td align="left">2,068,223,624</td>
 </tr>
 <tr class="odd">
 <td align="left">Avengers: Infinity War</td>
-<td align="right">2046239637</td>
+<td align="left">2,046,239,637</td>
 </tr>
 <tr class="even">
 <td align="left">Zootopia 2</td>
-<td align="right">1744338246</td>
+<td align="left">1,744,338,246</td>
 </tr>
 <tr class="odd">
 <td align="left">Jurassic World</td>
-<td align="right">1671713208</td>
+<td align="left">1,671,713,208</td>
 </tr>
 <tr class="even">
 <td align="left">The Lion King</td>
-<td align="right">1667635327</td>
+<td align="left">1,667,635,327</td>
 </tr>
 <tr class="odd">
 <td align="left">Spider-Man: No Way Home</td>
-<td align="right">1631853496</td>
+<td align="left">1,631,853,496</td>
 </tr>
 <tr class="even">
 <td align="left">The Avengers</td>
-<td align="right">1518815515</td>
+<td align="left">1,518,815,515</td>
 </tr>
 </tbody>
 </table>

@@ -204,7 +204,8 @@ knitr::kable(top_budget)
 top_revenue <- movies %>%
   select(title, revenue) %>%
   arrange(desc(revenue)) %>%
-  head(10)
+  head(10) %>%
+  mutate(revenue = comma(revenue))
 
 knitr::kable(top_revenue)
 ```
