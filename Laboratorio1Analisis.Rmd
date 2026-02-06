@@ -1,10 +1,21 @@
 ---
-title: 'Laboratorio 1: Análisis CineVision'
+title: 'Laboratorio 1: Análisis Exploratorio CineVision'
 output:
+  pdf_document: 
+    latex_engine: lualatex
+    fig_crop: false
   html_document: default
-  pdf_document: default
 date: "2026-02-02"
 ---
+
+#### Integrantes:
+- 22213 Jorge Chupina
+- 241452 Yehosua Hércules
+- 231270 Gadiel Ocaña
+
+#### Repositorio de Github:
+https://github.com/yosemm/Laboratorio1
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -14,16 +25,17 @@ library(scales)
 library(lubridate)
 ```
 
-```{r cargar_datos}
-movies <- read.csv("movies_2026.csv", stringsAsFactors = FALSE)
-```
-### **Repositorio de Github: https://github.com/yosemm/Laboratorio1 **
+
 
 ### Ejercicio 1: Exploración inicial
 
-##### *Haga una exploración rápida de sus datos, para eso haga un resumen de su conjunto de datos.* 
+##### **Haga una exploración rápida de sus datos, para eso haga un resumen de su conjunto de datos.**
 
-Se realiza una exploración rápida de los datos.
+Se utiliza glimpse para esta exploración rápida, ya que nos permite ver la estructura general del dataset, el tipo de cada variable y una muestra de los datos. Además, se utiliza summary para obtener estadísticas descriptivas básicas de las variables cuantitativas y un resumen de las variables cualitativas.
+
+```{r cargar_datos}
+movies <- read.csv("movies_2026.csv", stringsAsFactors = FALSE)
+```
 
 ```{r exploracion}
 # Ver estructura general
@@ -33,10 +45,10 @@ glimpse(movies)
 summary(movies)
 ```
 
-A simple vista, se ve que se tratan de 19,883 filas y 28 columnas. En las fila de revenue y budget, el valor más bajo es de 0. Mientras que en las filas de productionCompany, productionCompanyCountry y productionCountry, hay valores vacíos. Lo cual puede indicar dificultades al momento de conseguir los datos.
+A simple vista, se ve que se tratan de **19,883 filas** y **28 columnas**. En las fila de revenue y budget, el valor más bajo es de 0. Mientras que en las filas de *productionCompany*, *productionCompanyCountry* y *productionCountry*, hay valores vacíos. Lo cual puede indicar dificultades al momento de conseguir los datos.
 
 ### Ejercicio 2: Clasificación de Variables
-##### *Diga el tipo de cada una de las variables (cualitativa ordinal o nominal, cuantitativa continua, cuantitativa discreta)*  
+##### **Diga el tipo de cada una de las variables (cualitativa ordinal o nominal, cuantitativa continua, cuantitativa discreta)**
 
 Basado en la descripción de las variables y el contenido del dataset, la clasificación es la siguiente:
 
@@ -71,8 +83,10 @@ Basado en la descripción de las variables y el contenido del dataset, la clasif
 | **castWomenAmount** | Cuantitativa Discreta |
 | **castMenAmount** | Cuantitativa Discreta |
 
+**Nota:** En el dataset, los valores en *actorsPopularity* son de tipo carácter, pero representan una medida cuantitativa de popularidad. 
+
 ### Ejercicio 3: Distribución de Variables
-##### *Investigue si las variables cuantitativas siguen una distribución normal y haga una tabla de frecuencias de las variables cualitativas.* 
+##### **Investigue si las variables cuantitativas siguen una distribución normal y haga una tabla de frecuencias de las variables cualitativas.**
 
 ```{r analisis_normalidad, fig.height=10, fig.width=8}
 # Guardar las variables cuantitativas relevantes
@@ -185,7 +199,7 @@ movies %>%
 ```
 
 ### Ejercicio 4
-##### *Responda las siguientes preguntas:*
+##### **Responda las siguientes preguntas:**
 
 **4.1 ¿Cuáles son las 10 películas que contaron con más presupuesto?**
 ```{r top_presupuesto}

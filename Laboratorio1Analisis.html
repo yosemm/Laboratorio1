@@ -12,7 +12,7 @@
 
 <meta name="date" content="2026-02-02" />
 
-<title>Laboratorio 1: Análisis CineVision</title>
+<title>Laboratorio 1: Análisis Exploratorio CineVision</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -349,22 +349,36 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Laboratorio 1: Análisis CineVision</h1>
+<h1 class="title toc-ignore">Laboratorio 1: Análisis Exploratorio
+CineVision</h1>
 <h4 class="date">2026-02-02</h4>
 
 </div>
 
 
-<pre class="r"><code>movies &lt;- read.csv(&quot;movies_2026.csv&quot;, stringsAsFactors = FALSE)</code></pre>
-<div id="repositorio-de-github-httpsgithub.comyosemmlaboratorio1" class="section level3">
-<h3><strong>Repositorio de Github: <a href="https://github.com/yosemm/Laboratorio1" class="uri">https://github.com/yosemm/Laboratorio1</a> </strong></h3>
+<div id="integrantes" class="section level4">
+<h4>Integrantes:</h4>
+<ul>
+<li>22213 Jorge Chupina</li>
+<li>241452 Yehosua Hércules</li>
+<li>231270 Gadiel Ocaña</li>
+</ul>
+</div>
+<div id="repositorio-de-github" class="section level4">
+<h4>Repositorio de Github:</h4>
+<p><a href="https://github.com/yosemm/Laboratorio1" class="uri">https://github.com/yosemm/Laboratorio1</a></p>
 </div>
 <div id="ejercicio-1-exploración-inicial" class="section level3">
 <h3>Ejercicio 1: Exploración inicial</h3>
 <div id="haga-una-exploración-rápida-de-sus-datos-para-eso-haga-un-resumen-de-su-conjunto-de-datos." class="section level5">
-<h5><em>Haga una exploración rápida de sus datos, para eso haga un
-resumen de su conjunto de datos.</em></h5>
-<p>Se realiza una exploración rápida de los datos.</p>
+<h5><strong>Haga una exploración rápida de sus datos, para eso haga un
+resumen de su conjunto de datos.</strong></h5>
+<p>Se utiliza glimpse para esta exploración rápida, ya que nos permite
+ver la estructura general del dataset, el tipo de cada variable y una
+muestra de los datos. Además, se utiliza summary para obtener
+estadísticas descriptivas básicas de las variables cuantitativas y un
+resumen de las variables cualitativas.</p>
+<pre class="r"><code>movies &lt;- read.csv(&quot;movies_2026.csv&quot;, stringsAsFactors = FALSE)</code></pre>
 <pre class="r"><code># Ver estructura general
 glimpse(movies)</code></pre>
 <pre><code>## Rows: 19,883
@@ -463,18 +477,20 @@ summary(movies)</code></pre>
 ##  3rd Qu.:2025  
 ##  Max.   :2026  
 ##  NA&#39;s   :2</code></pre>
-<p>A simple vista, se ve que se tratan de 19,883 filas y 28 columnas. En
-las fila de revenue y budget, el valor más bajo es de 0. Mientras que en
-las filas de productionCompany, productionCompanyCountry y
-productionCountry, hay valores vacíos. Lo cual puede indicar
+<p>A simple vista, se ve que se tratan de <strong>19,883 filas</strong>
+y <strong>28 columnas</strong>. En las fila de revenue y budget, el
+valor más bajo es de 0. Mientras que en las filas de
+<em>productionCompany</em>, <em>productionCompanyCountry</em> y
+<em>productionCountry</em>, hay valores vacíos. Lo cual puede indicar
 dificultades al momento de conseguir los datos.</p>
 </div>
 </div>
 <div id="ejercicio-2-clasificación-de-variables" class="section level3">
 <h3>Ejercicio 2: Clasificación de Variables</h3>
 <div id="diga-el-tipo-de-cada-una-de-las-variables-cualitativa-ordinal-o-nominal-cuantitativa-continua-cuantitativa-discreta" class="section level5">
-<h5><em>Diga el tipo de cada una de las variables (cualitativa ordinal o
-nominal, cuantitativa continua, cuantitativa discreta)</em></h5>
+<h5><strong>Diga el tipo de cada una de las variables (cualitativa
+ordinal o nominal, cuantitativa continua, cuantitativa
+discreta)</strong></h5>
 <p>Basado en la descripción de las variables y el contenido del dataset,
 la clasificación es la siguiente:</p>
 <table>
@@ -599,14 +615,17 @@ la clasificación es la siguiente:</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Nota:</strong> En el dataset, los valores en
+<em>actorsPopularity</em> son de tipo carácter, pero representan una
+medida cuantitativa de popularidad.</p>
 </div>
 </div>
 <div id="ejercicio-3-distribución-de-variables" class="section level3">
 <h3>Ejercicio 3: Distribución de Variables</h3>
 <div id="investigue-si-las-variables-cuantitativas-siguen-una-distribución-normal-y-haga-una-tabla-de-frecuencias-de-las-variables-cualitativas." class="section level5">
-<h5><em>Investigue si las variables cuantitativas siguen una
+<h5><strong>Investigue si las variables cuantitativas siguen una
 distribución normal y haga una tabla de frecuencias de las variables
-cualitativas.</em></h5>
+cualitativas.</strong></h5>
 <pre class="r"><code># Guardar las variables cuantitativas relevantes
 vars_cuantitativas &lt;- movies %&gt;%
   select(budget, revenue, runtime, voteAvg, voteCount, genresAmount, productionCoAmount, productionCountriesAmount, actorsAmount, castWomenAmount, castMenAmount, popularity, voteCount) %&gt;%
@@ -1045,7 +1064,7 @@ movies %&gt;%
 <div id="ejercicio-4" class="section level3">
 <h3>Ejercicio 4</h3>
 <div id="responda-las-siguientes-preguntas" class="section level5">
-<h5><em>Responda las siguientes preguntas:</em></h5>
+<h5><strong>Responda las siguientes preguntas:</strong></h5>
 <p><strong>4.1 ¿Cuáles son las 10 películas que contaron con más
 presupuesto?</strong></p>
 <pre class="r"><code>options(scipen = 999)
