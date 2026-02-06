@@ -1,10 +1,10 @@
 ---
 title: 'Laboratorio 1: Análisis Exploratorio CineVision'
 output:
+  html_document: default
   pdf_document: 
     latex_engine: lualatex
     fig_crop: false
-  html_document: default
 date: "2026-02-02"
 ---
 
@@ -94,7 +94,7 @@ La clasificación de las variables permite seleccionar adecuadamente las técnic
 ```{r analisis_normalidad, fig.height=10, fig.width=8}
 # Guardar las variables cuantitativas relevantes
 vars_cuantitativas <- movies %>%
-  select(budget, revenue, runtime, voteAvg, voteCount, genresAmount, productionCoAmount, productionCountriesAmount, actorsAmount, castWomenAmount, castMenAmount, popularity, voteCount) %>%
+  select(budget, revenue, runtime, voteAvg, voteCount, genresAmount, productionCoAmount, productionCountriesAmount, actorsAmount, popularity, voteCount) %>%
   drop_na() # Eliminamos NAs
 
 # 1. Visualización: Histogramas
@@ -221,7 +221,7 @@ top_budget <- movies %>%
   head(10)%>%
   mutate(budget = comma(budget))
 
-knitr::kable(top_budget)
+knitr::kable(top_budget, caption = "Top 10 películas con mayor presupuesto")
 ```
 Las películas con mayor presupuesto corresponden principalmente a producciones de gran escala, asociadas a grandes estudios y franquicias. Esto evidencia una alta concentración de recursos financieros en un número reducido de proyectos dentro de la industria cinematográfica.
 
@@ -234,7 +234,7 @@ top_revenue <- movies %>%
   head(10) %>%
   mutate(revenue = comma(revenue))
 
-knitr::kable(top_revenue)
+knitr::kable(top_revenue, caption = "Top 10 películas con mayores ingresos")
 ```
 Las películas con mayores ingresos tienden a coincidir con producciones de alto presupuesto, aunque no de forma estricta. Esto sugiere que una inversión elevada aumenta las probabilidades de éxito comercial, pero no garantiza altos ingresos por sí sola.
 
@@ -245,7 +245,7 @@ top_votos <- movies %>%
   select(title, voteCount) %>%
   arrange(desc(voteCount)) %>%
   head(1)
-knitr::kable(top_votos)
+knitr::kable(top_votos, caption = "Película con mayor número de votos de usuarios")
 ```
 La película con mayor número de votos refleja una alta participación de los usuarios, lo cual suele estar asociado a una amplia distribución y una elevada visibilidad entre el público.
 
@@ -257,7 +257,7 @@ peor_pelicula <- movies %>%
   filter(voteCount > 100) %>%
   arrange(voteAvg) %>%
   head(1)
-knitr::kable(peor_pelicula)
+knitr::kable(peor_pelicula, caption = "Película con la peor calificación que obtuvo más de 100 votos")
 ```
 El uso de un filtro mínimo de votos permite reducir el sesgo que generan películas con muy pocas evaluaciones. De esta forma, la calificación obtenida representa una opinión más confiable del público general y no casos aislados.
 
@@ -546,20 +546,28 @@ Esto sugiere que la composición de género del elenco, por sí sola, no es un f
 ```{r directores_top_calificadas}
 top_20_calificadas <- movies %>%
   select(title, director, voteAvg, voteCount) %>%
-  filter(!is.na(voteAvg), !is.na(voteCount), voteCount >= 100, director != "") %>%
+  mutate(
+    title = iconv(title, to = "UTF-8"),
+    director = iconv(director, to = "UTF-8"),
+    director = str_trim(director) 
+  ) %>%
+  filter(
+    !is.na(voteAvg),
+    !is.na(voteCount),
+    voteCount >= 100,
+    !is.na(director),
+    director != "",
+    director != "NA"
+  ) %>%
   arrange(desc(voteAvg), desc(voteCount)) %>%
-  slice_head(n = 20) %>%
-mutate(
-    title = iconv(title, to = "UTF-8"), 
-    director = iconv(director, to = "UTF-8")
-  )
+  slice_head(n = 20)
 
 knitr::kable(top_20_calificadas, caption = "4.10a: Top 20 películas mejor calificadas (mínimo 100 votos)")
 
 directores_top <- top_20_calificadas %>%
   separate_rows(director, sep = "\\|") %>%
   mutate(director = str_trim(director)) %>%
-  filter(director != "") %>%
+  filter(director != "", director != "NA") %>%
   count(director, sort = TRUE)
 
 knitr::kable(directores_top, caption = "4.10b: Directores presentes en el top 20")
@@ -580,7 +588,7 @@ La recurrencia de ciertos directores en el listado de películas mejor calificad
 
 **4.11. ¿Cómo se correlacionan los presupuestos con los ingresos? ¿Los altos presupuestos significan altos ingresos?**
 
-```{r presupuesto_vs_ingresos}
+```{r presupuesto_vs_ingresos, warning=FALSE}
 datos_presupuesto_ingresos <- movies %>%
   select(budget, revenue) %>%
   filter(!is.na(budget), !is.na(revenue), budget > 0, revenue > 0)
@@ -906,7 +914,7 @@ La combinación de múltiples estrategias de marketing parece reforzar el desemp
 
 **4.16. ¿La popularidad del elenco está directamente correlacionada con el éxito de taquilla?**
 
-```{r popularidad_elenco_taquilla}
+```{r popularidad_elenco_taquilla, warning=FALSE}
 promedio_pop_elenco <- function(x) {
   if (is.na(x) || x == "") {
     return(NA_real_)
